@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Email Generator</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="page-container">
+      <header>
+        <h1>AI Email Generator</h1>
+        <p>Describe the recipient, purpose, and tone, and the app will draft a polished email for you.</p>
+      </header>
+
+      <main>
+        <form id="emailForm">
+          <label for="recipient_name">Recipient Name</label>
+          <input id="recipient_name" name="recipient_name" placeholder="Alex" required />
+
+          <label for="purpose">Purpose</label>
+          <input id="purpose" name="purpose" placeholder="Follow up on our meeting" required />
+
+          <label for="tone">Tone</label>
+          <select id="tone" name="tone">
+            <option value="professional">Professional</option>
+            <option value="friendly">Friendly</option>
+            <option value="formal">Formal</option>
+          </select>
+
+          <label for="details">Additional Details</label>
+          <textarea id="details" name="details" rows="8" placeholder="Add key points, context, or requests here..." required></textarea>
+
+          <label for="sender_name">Your Name</label>
+          <input id="sender_name" name="sender_name" placeholder="Your Name" />
+
+          <div class="actions">
+            <button type="submit">Generate Email</button>
+            <a class="secondary-link" href="/code-analyzer">Open Code Analyzer</a>
+          </div>
+        </form>
+
+        <div id="status" class="status hidden"></div>
+        <div id="result" class="result hidden"></div>
+      </main>
+    </div>
+
+    <script>
+      const form = document.getElementById('emailForm');
+      const status = document.getElementById('status');
+      const result = document.getElementById('result');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const payload = {
+          recipient_name: document.getElementById('recipient_name').value.trim(),
+          purpose: document.getElementById('purpose').value.trim(),
+          tone: document.getElementById('tone').value,
+          details: document.getElementById('details').value.trim(),
+          sender_name: document.getElementById('sender_name').value.trim()
+        };
+
+        if (!payload.recipient_name || !payload.purpose || !payload.details) {
+          showStatus('Recipient name, purpose, and details are required.', 'error');
+          return;
+        }
+
+        showStatus('Generating your email...', 'info');
+        result.className = 'result hidden';
+
+        try {
+          const response = await fetch('/generate-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to generate email');
+          }
+
+          const data = await response.json();
+          renderResult(data);
+          showStatus('Email draft ready.', 'success');
+        } catch (err) {
+          showStatus(err.message, 'error');
+        }
+      });
+
+      function showStatus(message, type) {
+        status.textContent = message;
+        status.className = `status ${type}`;
+      }
+
+      function renderResult(data) {
+        result.innerHTML = `
+          <section class="card">
+            <h2>Draft Email</h2>
+            <p><strong>Subject:</strong> ${escapeHtml(data.subject)}</p>
+          </section>
+          <section class="card preview">
+            <h3>Email Body</h3>
+            <pre>${escapeHtml(data.body)}</pre>
+          </section>
+        `;
+        result.className = 'result visible';
+      }
+
+      function escapeHtml(text) {
+        return text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+    </script>
+  </body>
+</html>

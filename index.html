@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Resume Analyzer</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header>
+      <h1>AI Resume Analyzer</h1>
+      <p>Upload a PDF resume and get instant analysis, skills extraction, and recommendations.</p>
+    </header>
+
+    <main>
+      <form id="uploadForm">
+        <label for="resumeFile">Select resume PDF</label>
+        <input id="resumeFile" name="resumeFile" type="file" accept="application/pdf" required />
+        <button type="submit">Analyze Resume</button>
+      </form>
+
+      <div id="status" class="status hidden"></div>
+      <div id="result" class="result hidden"></div>
+    </main>
+  </div>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const status = document.getElementById('status');
+    const result = document.getElementById('result');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const fileInput = document.getElementById('resumeFile');
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      status.className = 'status';
+      status.textContent = 'Analyzing resume...';
+      result.className = 'result hidden';
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('/analyze', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.detail || 'Upload failed');
+        }
+
+        const data = await response.json();
+        renderResult(data);
+        status.className = 'status success';
+        status.textContent = 'Analysis complete.';
+      } catch (error) {
+        status.className = 'status error';
+        status.textContent = error.message;
+      }
+    });
+
+    function renderResult(data) {
+      result.innerHTML = `
+        <section class="card">
+          <h2>${data.name}</h2>
+          <p><strong>File:</strong> ${data.filename}</p>
+          <p><strong>Score:</strong> ${data.score}/100</p>
+        </section>
+        <section class="card">
+          <h3>Contact</h3>
+          <p><strong>Email:</strong> ${data.contact.email.join(', ') || 'Not found'}</p>
+          <p><strong>Phone:</strong> ${data.contact.phone.join(', ') || 'Not found'}</p>
+        </section>
+        <section class="card">
+          <h3>Summary</h3>
+          <p>${data.summary || 'No summary found'}</p>
+        </section>
+        <section class="card">
+          <h3>Top Skills</h3>
+          <p>${data.top_skills.length ? data.top_skills.join(', ') : 'No skills identified'}</p>
+        </section>
+        <section class="card">
+          <h3>Education</h3>
+          <ul>${data.education.length ? data.education.map(item => `<li>${item}</li>`).join('') : '<li>No education section found</li>'}</ul>
+        </section>
+        <section class="card">
+          <h3>Experience snippets</h3>
+          <ul>${data.experience_snippets.length ? data.experience_snippets.map(item => `<li>${item}</li>`).join('') : '<li>No experience section found</li>'}</ul>
+        </section>
+        <section class="card recommendations">
+          <h3>Recommendations</h3>
+          <ul>${data.recommendations.length ? data.recommendations.map(item => `<li>${item}</li>`).join('') : '<li>Resume looks good.</li>'}</ul>
+        </section>
+        <section class="card preview">
+          <h3>Resume preview</h3>
+          <pre>${escapeHtml(data.preview)}</pre>
+        </section>
+      `;
+      result.className = 'result visible';
+    }
+
+    function escapeHtml(input) {
+      return input
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+  </script>
+</body>
+</html>
