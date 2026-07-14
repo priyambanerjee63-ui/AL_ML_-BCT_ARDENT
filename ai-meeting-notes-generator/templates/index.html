@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Image Caption Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>AI Image Caption Generator</h1>
+      <p>Upload an image and create a polished caption in seconds.</p>
+
+      {% if error %}
+      <p class="error">{{ error }}</p>
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data">
+        <label for="image">Choose image</label>
+        <input id="image" name="image" type="file" accept="image/*" required />
+
+        <label for="prompt">Optional style prompt</label>
+        <input id="prompt" name="prompt" type="text" placeholder="e.g. cinematic, cheerful, professional" />
+
+        <button type="submit">Generate Caption</button>
+      </form>
+    </main>
+  </body>
+</html>

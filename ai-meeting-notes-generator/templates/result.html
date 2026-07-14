@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Caption Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Generated Caption</h1>
+      <p class="caption">{{ caption }}</p>
+      {% if image_name %}
+      <p><strong>Source image:</strong> {{ image_name }}</p>
+      {% endif %}
+      <a href="{{ url_for('index') }}">Generate another</a>
+    </main>
+  </body>
+</html>
