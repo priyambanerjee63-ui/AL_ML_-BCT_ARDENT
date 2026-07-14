@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Personal Finance Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <sidebar class="sidebar">
+            <div class="sidebar-header">
+                <h2>💰 FinanceAI</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" onclick="showSection('dashboard')">📊 Dashboard</a>
+                <a href="#" class="nav-item" onclick="showSection('expenses')">💸 Expenses</a>
+                <a href="#" class="nav-item" onclick="showSection('budget')">📋 Budget</a>
+                <a href="#" class="nav-item" onclick="showSection('investments')">📈 Investments</a>
+                <a href="#" class="nav-item" onclick="showSection('goals')">🎯 Goals</a>
+                <a href="#" class="nav-item" onclick="showSection('ai_advisor')">🤖 AI Advisor</a>
+            </nav>
+        </sidebar>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Navigation Bar -->
+            <header class="top-nav">
+                <h1>Personal Finance Dashboard</h1>
+                <div class="user-profile">
+                    <span>👤 User</span>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active">
+                <div class="dashboard-grid">
+                    <!-- Summary Cards -->
+                    <div class="card card-primary">
+                        <h3>Monthly Expenses</h3>
+                        <p class="amount" id="monthly-expenses">$0.00</p>
+                        <p class="subtitle">This Month</p>
+                    </div>
+
+                    <div class="card card-secondary">
+                        <h3>Budget Remaining</h3>
+                        <p class="amount" id="budget-remaining">$0.00</p>
+                        <p class="subtitle">Available</p>
+                    </div>
+
+                    <div class="card card-success">
+                        <h3>Investments</h3>
+                        <p class="amount" id="investment-value">$0.00</p>
+                        <p class="subtitle" id="investment-gain">+$0.00</p>
+                    </div>
+
+                    <div class="card card-info">
+                        <h3>Goals Progress</h3>
+                        <p class="amount" id="goals-progress">0%</p>
+                        <p class="subtitle">Towards Target</p>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Expense Breakdown</h3>
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Expenses Section -->
+            <section id="expenses" class="content-section">
+                <h2>Expenses</h2>
+                <div class="section-container">
+                    <div class="form-card">
+                        <h3>Add New Expense</h3>
+                        <form id="expenseForm" class="form">
+                            <input type="number" placeholder="Amount" id="expenseAmount" step="0.01" required>
+                            <select id="expenseCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="food">🍔 Food & Dining</option>
+                                <option value="transport">🚗 Transport</option>
+                                <option value="utilities">💡 Utilities</option>
+                                <option value="entertainment">🎬 Entertainment</option>
+                                <option value="shopping">🛒 Shopping</option>
+                                <option value="health">🏥 Health</option>
+                                <option value="other">📌 Other</option>
+                            </select>
+                            <input type="text" placeholder="Description" id="expenseDescription">
+                            <input type="date" id="expenseDate">
+                            <button type="submit" class="btn btn-primary">Add Expense</button>
+                        </form>
+                    </div>
+
+                    <div class="data-card">
+                        <h3>Recent Expenses</h3>
+                        <div id="expensesList" class="items-list">
+                            <!-- Expenses will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Budget Section -->
+            <section id="budget" class="content-section">
+                <h2>Budget Management</h2>
+                <div class="section-container">
+                    <div class="form-card">
+                        <h3>Create Budget</h3>
+                        <form id="budgetForm" class="form">
+                            <select id="budgetCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="food">🍔 Food & Dining</option>
+                                <option value="transport">🚗 Transport</option>
+                                <option value="utilities">💡 Utilities</option>
+                                <option value="entertainment">🎬 Entertainment</option>
+                                <option value="shopping">🛒 Shopping</option>
+                                <option value="health">🏥 Health</option>
+                            </select>
+                            <input type="number" placeholder="Monthly Limit" id="budgetLimit" step="0.01" required>
+                            <button type="submit" class="btn btn-primary">Create Budget</button>
+                        </form>
+                    </div>
+
+                    <div class="data-card">
+                        <h3>Active Budgets</h3>
+                        <div id="budgetsList" class="items-list">
+                            <!-- Budgets will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Investments Section -->
+            <section id="investments" class="content-section">
+                <h2>Investment Portfolio</h2>
+                <div class="section-container">
+                    <div class="form-card">
+                        <h3>Add Investment</h3>
+                        <form id="investmentForm" class="form">
+                            <input type="text" placeholder="Asset Name" id="assetName" required>
+                            <select id="assetType" required>
+                                <option value="">Select Type</option>
+                                <option value="stock">📈 Stock</option>
+                                <option value="mutual_fund">💼 Mutual Fund</option>
+                                <option value="bond">📊 Bond</option>
+                                <option value="crypto">🪙 Cryptocurrency</option>
+                                <option value="realestate">🏠 Real Estate</option>
+                            </select>
+                            <input type="number" placeholder="Purchase Price" id="purchasePrice" step="0.01" required>
+                            <input type="number" placeholder="Current Price" id="currentPrice" step="0.01" required>
+                            <input type="number" placeholder="Quantity" id="quantity" step="0.01" required>
+                            <input type="date" id="purchaseDate">
+                            <button type="submit" class="btn btn-primary">Add Investment</button>
+                        </form>
+                    </div>
+
+                    <div class="data-card">
+                        <h3>Your Investments</h3>
+                        <div id="investmentsList" class="items-list">
+                            <!-- Investments will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Goals Section -->
+            <section id="goals" class="content-section">
+                <h2>Financial Goals</h2>
+                <div class="section-container">
+                    <div class="form-card">
+                        <h3>Set a Goal</h3>
+                        <form id="goalsForm" class="form">
+                            <input type="text" placeholder="Goal Title" id="goalTitle" required>
+                            <textarea placeholder="Description" id="goalDescription"></textarea>
+                            <input type="number" placeholder="Target Amount" id="targetAmount" step="0.01" required>
+                            <select id="goalCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="savings">💾 Savings</option>
+                                <option value="investment">📈 Investment</option>
+                                <option value="debt_payoff">🔄 Debt Payoff</option>
+                                <option value="emergency_fund">🆘 Emergency Fund</option>
+                            </select>
+                            <input type="date" id="goalDeadline">
+                            <button type="submit" class="btn btn-primary">Create Goal</button>
+                        </form>
+                    </div>
+
+                    <div class="data-card">
+                        <h3>Your Goals</h3>
+                        <div id="goalsList" class="items-list">
+                            <!-- Goals will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Advisor Section -->
+            <section id="ai_advisor" class="content-section">
+                <h2>🤖 AI Financial Advisor</h2>
+                <div class="section-container">
+                    <div class="chat-card">
+                        <div class="chat-box" id="chatBox">
+                            <div class="chat-message bot">
+                                <p>👋 Hello! I'm your AI Financial Advisor. Ask me anything about budgeting, investing, saving, or personal finance!</p>
+                            </div>
+                        </div>
+                        <form id="chatForm" class="chat-input-form">
+                            <input type="text" id="chatInput" placeholder="Ask me a financial question..." required>
+                            <button type="submit" class="btn btn-primary">Send</button>
+                        </form>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>Financial Tips</h3>
+                        <div id="tipsContainer">
+                            <!-- Tips will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
